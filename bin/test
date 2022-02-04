@@ -1,0 +1,15 @@
+#!/bin/bash
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+TYPE=$1
+shift 1
+
+if [ "$TYPE" == "integration" ] || [ -z "$TYPE" ]
+then
+    $PARENT_PATH/env dev exec event-listener vendor/bin/behat $@
+fi
+if [ "$TYPE" == "unit" ] || [ -z "$TYPE" ]
+then
+    $PARENT_PATH/env dev exec event-listener vendor/bin/phpunit $@ tests/unit
+fi
+

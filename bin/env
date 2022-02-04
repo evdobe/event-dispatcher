@@ -1,0 +1,16 @@
+#!/bin/bash
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+ENVIRONMENT=$1
+shift 1
+COMMAND=$1
+shift 1
+
+if [ -z "$ENVIRONMENT" ] || [ -z "$COMMAND" ]
+then
+    echo "Usage: ./bin/env ENVIRONMENT COMMAND [OPTIONS]"
+    exit -1
+fi
+
+$PARENT_PATH/lib/command/$COMMAND.sh $ENVIRONMENT $@
+

@@ -1,0 +1,86 @@
+services:
+  event-listener:
+    build: 
+      dockerfile: ops/envs/prod/cont/event-listener/Dockerfile
+      context: ../../../../
+    environment:
+      HOST_GID: ${HOST_UID}
+      HOST_UID: ${HOST_UID}
+      HTTP_PORT: ${HTTP_PORT}
+      TZ: ${TIME_ZONE}
+      MESSAGE_BROKER_HOST: ${MESSAGE_BROKER_HOST}
+      MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
+      MESSAGE_CONSUMER_GROUP: ${MESSAGE_CONSUMER_GROUP}
+      EVENT_CHANNELS: ${EVENT_CHANNELS}
+      INVALID_CHANNEL: ${INVALID_CHANNEL}
+      STORE_DB_HOST: db
+      STORE_DB_USER: ${STORE_DB_USER}
+      STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
+      STORE_DB_NAME: ${STORE_DB_NAME}
+    expose: 
+    - ${HTTP_PORT}
+    ports: 
+    - ${HTTP_PORT}:${HTTP_PORT}
+    depends_on:
+      - kafka
+      - db
+  zookeeper:
+    image: quay.io/strimzi/kafka:0.27.0-kafka-3.0.0
+    command: [
+        "sh", "-c",
+        "bin/zookeeper-server-start.sh config/zookeeper.properties"
+      ]
+    expose:
+    - 2181
+    environment:
+      LOG_DIR: /tmp/logs
+  kafka:
+    image: evdobe/kafka:strimzi-0.27.0-kafka-3.0.0
+    command: [
+      "/opt/scripts/entrypoint.sh"
+    ]
+    depends_on:
+    - zookeeper
+    expose:
+    - 29092
+    environment:
+      LOG_DIR: "/tmp/logs"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:29092,PLAINTEXT_HOST://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS_SEPARATOR: "$$'\n'"
+      KAFKA_CREATE_TOPICS: ${MESSAGE_TOPICS}
+  db:
+    build: ../../dev/cont/db/
+    environment:
+      POSTGRES_PASSWORD: "${STORE_DB_PASSWORD}"
+      POSTGRES_USER: "${STORE_DB_USER}"
+      POSTGRES_DB: "${STORE_DB_NAME}"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    expose:
+      - 5432
+  tester:
+    build: 
+      dockerfile: ops/envs/test/cont/tester/Dockerfile
+      context: ../../../../
+    environment:
+      HOST_GID: ${HOST_UID}
+      HOST_UID: ${HOST_UID}
+      HTTP_PORT: ${HTTP_PORT}
+      TZ: ${TIME_ZONE}
+      MESSAGE_BROKER_HOST: ${MESSAGE_BROKER_HOST}
+      MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
+      MESSAGE_CONSUMER_GROUP: ${MESSAGE_CONSUMER_GROUP}
+      EVENT_CHANNELS: ${EVENT_CHANNELS}
+      INVALID_CHANNEL: ${INVALID_CHANNEL}
+      STORE_DB_HOST: db
+      STORE_DB_USER: ${STORE_DB_USER}
+      STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
+      STORE_DB_NAME: ${STORE_DB_NAME}
+    depends_on:
+      - kafka
+      - db
+      - event-listener
+      

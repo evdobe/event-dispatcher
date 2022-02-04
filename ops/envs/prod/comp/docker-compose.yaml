@@ -1,0 +1,23 @@
+services:
+  event-listener:
+    build: 
+      dockerfile: ops/envs/prod/cont/event-listener/Dockerfile
+      context: ../../../../ 
+    environment:
+      HOST_GID: ${HOST_UID}
+      HOST_UID: ${HOST_UID}
+      HTTP_PORT: ${HTTP_PORT}
+      TZ: ${TIME_ZONE}
+      MESSAGE_BROKER_HOST: ${MESSAGE_BROKER_HOST}
+      MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
+      MESSAGE_CONSUMER_GROUP: ${MESSAGE_CONSUMER_GROUP}
+      EVENT_CHANNELS: ${EVENT_CHANNELS}
+      INVALID_CHANNEL: ${INVALID_CHANNEL}
+      STORE_DB_HOST: ${STORE_DB_HOST}
+      STORE_DB_USER: ${STORE_DB_USER}
+      STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
+      STORE_DB_NAME: ${STORE_DB_NAME}
+    expose: 
+    - ${HTTP_PORT}
+    ports: 
+    - ${HTTP_PORT}:${HTTP_PORT}

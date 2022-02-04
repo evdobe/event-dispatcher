@@ -1,0 +1,18 @@
+{
+    "name": "evdobe/event-listener",
+    "description": "A process that listens to a domain event channel, translates and persists events of interest to an event store.",
+    "authors": [
+        {
+            "name": "Konstantinos Togias",
+            "email": "info@ktogias.gr"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Infrastructure\\": "Infrastructure",
+            "Application\\": "Application",
+            "Domain\\": "Domain"
+        }
+    }
+}

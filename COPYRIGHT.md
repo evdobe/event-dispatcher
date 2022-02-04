@@ -1,0 +1,1 @@
+Copyright (c) 2022 Konstantinos Togias <info@ktogias.gr>
