@@ -76,4 +76,11 @@ class Message implements ApplicationMessage
         return new Message($delegate);
     }
 
+    public function withKey(string $key): ApplicationMessage
+    {
+        $delegate = clone($this->delegate);
+        $delegate->setKey($key);
+        return new Message($delegate);
+    }
+
 }
