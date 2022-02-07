@@ -26,4 +26,6 @@ interface Message
     public function withoutHeader(string $name):Message;
 
     public function withoutProperty(string $name):Message;
+
+    public function withKey(string $key):Message;
 }

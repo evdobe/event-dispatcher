@@ -6,6 +6,6 @@ interface Producer
 {
     public function __construct(array $config);
 
-    public function send(string $channel, Message $message):void;
+    public function send(Message $message):void;
 
 }

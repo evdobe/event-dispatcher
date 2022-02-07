@@ -19,27 +19,24 @@ class Producer implements ApplicationProducer
 
     protected RdKafkaProducer $delegate;
 
-    protected array $channels;
+    protected RdKafkaTopic $topic;
 
-    public function __construct(protected array $config)
+    public function __construct(protected array $config, protected string $channel)
     {
         $this->context = (new RdKafkaConnectionFactory($config))
             ->createContext();
+        $this->topic = $this->context->createTopic($channel);
         $this->delegate = $this->context->createProducer();
     }
 
-    public function send(string $channel, Message $message):void
+    public function send(Message $message):void
     {
-        if (!array_key_exists($channel, $this->channels)){
-            $this->channels[$channel] = $this->context->createTopic($channel);
-        }
-        $topic = $this->channels[$channel];
-        $kafkaMessage = new RdKafkaMessage(
+        $kafkaMessage = $this->context->createMessage(
             body: $message->getBody(),
             properties: $message->getProperties(),
             headers: $message->getHeaders()
         );
-        $this->delegate->send(destination:$topic, message:$kafkaMessage);
+        $this->delegate->send(destination:$this->topic, message:$kafkaMessage);
         
     }
 }

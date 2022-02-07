@@ -2,9 +2,7 @@
 
 namespace Application\Event;
 
-use Application\Messaging\Message;
-
 interface Store
 {
-
+    public function listen(Dispatcher $dispatcher):void;
 }

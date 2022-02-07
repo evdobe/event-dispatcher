@@ -1,42 +1,39 @@
 <?php declare(strict_types=1);
 
+use Application\Event\Filter;
+use Application\Messaging\MessageBuilder;
+
 $connectionConfig = [
     'global' => [
         'metadata.broker.list' => getenv('MESSAGE_BROKER_HOST').':'.getenv('MESSAGE_BROKER_PORT'),
     ]
 ];
 
-$channels = getenv('EVENT_CHANNELS');
+$channel = getenv('EVENT_CHANNEL');
 
-$channelsConfig = array_filter(array_map(function(string $row){
+$eventFilterStr = getenv('EVENT_FILTER');
+$eventFilterConfigParts = array_map(function(string $row){
     return trim($row);
-},explode("\n", $channels)));
+},explode('|', $eventFilterStr));
 
-$channelsConfig = array_reduce($channelsConfig, function(array $carry, string $item){
-    $parts = array_map(function(string $row){
-        return trim($row);
-    },explode(":", $item));
+$eventFilterClassName = array_shift($eventFilterConfigParts);
+$eventFilterConfig = [
+    'filter' => $eventFilterClassName?$eventFilterClassName:Filter::class,
+    'args' => array_values($eventFilterConfigParts)
+];
 
-    $classConfig = function(string $configStr){
-        $parts = explode("|", $configStr);
-        $className = trim(array_shift($parts));
-        $argumentArray = array_map(function(string $arg){
-            return trim($arg);
-        },$parts);
-        return $className?[
-            'class' => $className,
-            'arg' => $argumentArray
-        ]:null;
-    };
-    
-    $carry[$parts[0]] = [
-        'filter' => count($parts) >1?$classConfig($parts[1]):null,
-        'builder' => count($parts) >2?$classConfig($parts[2]):null,
-    ];
-    return $carry;
-},[]);
+$messageBuilderStr = getenv('MeSSAGE_BUILDER');
+$messageBuilderConfigParts = array_map(function(string $row){
+    return trim($row);
+},explode('|', $messageBuilderStr));
+
+$messageBuilderClassName = array_shift($messageBuilderConfigParts);
+$messageBuilderConfig = [
+    'builder' => $messageBuilderClassName?$messageBuilderClassName:MessageBuilder::class,
+    'args' => array_values($messageBuilderConfigParts)
+];
 
 return [
-    'connection' => $connectionConfig,
-    'channels' => $channelsConfig
+    'eventFilter' => $eventFilterConfig,
+    'messageBuilder' => $messageBuilderConfig
 ];
