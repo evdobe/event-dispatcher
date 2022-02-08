@@ -3,6 +3,7 @@
 namespace Infrastructure\Event\Adapter\Postgres;
 
 use Application\Event\Dispatcher;
+use Application\Event\Filter;
 use Application\Event\Mapper;
 use Application\Event\Store as EventStore;
 use Application\Messaging\Message;
@@ -19,7 +20,7 @@ class Store implements EventStore
         RETURNS trigger
         AS \$function\$
         BEGIN
-            IF NEW.dispatched = false THEN
+            IF NEW.dispatched = false %%filter_matcher%% THEN
                 PERFORM pg_notify('event', row_to_json(NEW)::text);
             END IF;
             RETURN NULL;
@@ -39,7 +40,7 @@ class Store implements EventStore
 
     protected const LISTEN_TIMEOUT = 60*10000;
 
-    public function __construct()
+    public function __construct(protected ?Filter $filter = null)
     {
         $this->con = new PDO("pgsql:host=".getenv('STORE_DB_HOST').";dbname=".getenv('STORE_DB_NAME'), getenv('STORE_DB_USER'), getenv('STORE_DB_PASSWORD'));
         $this->setUpListener();
@@ -58,7 +59,11 @@ class Store implements EventStore
     }
 
     protected function setUpListener(){
-        $this->con->exec(SELF::EVENT_NOTIFY_PROCEDURE_SQL);
+        $filterMatcher = '';
+        if ($this->filter && $matcherStr = $this->filter->getSqlMatcher()){
+            $filterMatcher = "AND (".$matcherStr.")";
+        }
+        $this->con->exec(str_replace("%%filter_matcher%%", $filterMatcher, SELF::EVENT_NOTIFY_PROCEDURE_SQL));
         try {
             $this->con->exec(SELF::EVENT_NOTIFY_TRIGGER_SQL);
         }

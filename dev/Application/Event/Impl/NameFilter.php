@@ -20,7 +20,7 @@ class NameFilter implements Filter
 
     public function getSqlMatcher(): ?string
     {
-        return '';
+        return 'NEW.name IN (\''.implode('\',\'', $this->names).'\')';
     }
 
 }

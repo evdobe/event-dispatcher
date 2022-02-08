@@ -27,10 +27,13 @@ $dispatcherConfig = include('config/dispatcher.php');
 
 $process = $container->make(Process::class, ["callback" => function($process) use ($dispatcherConfig, $container){
     echo "Starting process...\n";
+    $filter = $dispatcherConfig['filter']?$container->make($dispatcherConfig['filter']['class'], ['args' => $dispatcherConfig['filter']['args']]):null;
     $eventDispatcher = $container->make(EventDispatcher::class, [
-        'store' => $container->get(Store::class),
+        'store' => $container->make(Store::class, [
+            'filter' => $filter, 
+        ]),
         'producer' => $container->make(MessagingProducer::class, ['config' => $dispatcherConfig['connectionConfig'], 'channel' => $dispatcherConfig['channel']]), 
-        'filter' => $dispatcherConfig['filter']?$container->make($dispatcherConfig['filter']['class'], ['args' => $dispatcherConfig['filter']['args']]):null, 
+        'filter' => $filter, 
         'builder' => $container->make(MessageBuilder::class, [
             'mapper' =>  $container->make(
                 $dispatcherConfig['mapper']['class'], 
