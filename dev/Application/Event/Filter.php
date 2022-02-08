@@ -7,4 +7,6 @@ interface Filter
     public function __construct(array $args);
 
     public function matches(array $eventData):bool;
+
+    public function getSqlMatcher():?string;
 }

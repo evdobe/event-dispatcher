@@ -24,6 +24,10 @@ class DispatchEventContext implements Context
         (name, "aggregate_id", "aggregate_version", data, "timestamp") 
         VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp)';
 
+    const ALREADY_DISPATCHED_EVENT_INSERT_SQL = 'INSERT INTO event 
+        (name, "aggregate_id", "aggregate_version", data, "timestamp", "dispatched", "dispatched_at") 
+        VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp, true, :dispatched_at)';
+
 
     protected static RdKafkaContext $kafkaContext;
 
@@ -188,6 +192,35 @@ class DispatchEventContext implements Context
         Assert::that($data['dispatched_at'])->null();
     }
 
+    /**
+     * @When an already dispatcehd event is inserted in db
+     */
+    public function anAlreadyDispatcehdEventIsInsertedInDb()
+    {
+        $statement = $this->con->prepare(self::ALREADY_DISPATCHED_EVENT_INSERT_SQL);
+        $statement->execute(
+            [
+                ':name' => $this->getFilterMatchingEventName(),
+                ':aggregate_id' => 2,
+                ':aggregate_version' => 1,
+                ':data' => '{"akey":"avalue"}',
+                ':timestamp' => '2022-01-28 12:23:56',
+                ':dispatched_at' => '2022-01-28 12:26:47',
+            ]
+        );
+        $this->lastEventId = $this->con->lastInsertId();
+    }
 
+    /**
+     * @Then the event dispatced datetime should not be altered
+     */
+    public function theEventDispatcedDatetimeShouldNotBeAltered()
+    {
+        $stmt = $this->con->prepare('SELECT "dispatched_at" FROM event where id = :id');
+        $stmt->execute(['id' => $this->lastEventId]); 
+        $data = $stmt->fetch();
+
+        Assert::that($data['dispatched_at'])->eq('2022-01-28 12:26:47');
+    }
 
 }

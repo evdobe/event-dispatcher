@@ -18,4 +18,9 @@ class NameFilter implements Filter
         return in_array($eventData['name'], $this->names);
     }
 
+    public function getSqlMatcher(): ?string
+    {
+        return '';
+    }
+
 }
