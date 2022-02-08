@@ -12,8 +12,12 @@ use Application\Event\Dispatcher as EventDispatcher;
 use Application\Messaging\Producer as MessagingProducer;
 
 use Application\Execution\Process;
+use Application\Execution\Timer;
 use Application\Messaging\MessageBuilder;
 use Application\Messaging\MessageMapper;
+use DI\Container;
+
+use function PHPUnit\Framework\isEmpty;
 
 $builder = new DI\ContainerBuilder();
 $builder->addDefinitions('config/di.php');
@@ -22,33 +26,25 @@ $container = $builder->build();
 $httpServer = $container->get(HttpServer::class);
 $httpHandler = $container->get(HttpHandler::class);
 
-$dispatcherConfig = include('config/dispatcher.php');
+$timer = $container->get(Timer::class);
 
+$dispatcherConfig = include('config/dispatcher.php');
 
 $process = $container->make(Process::class, ["callback" => function($process) use ($dispatcherConfig, $container){
     echo "Starting process...\n";
-    $filter = $dispatcherConfig['filter']?$container->make($dispatcherConfig['filter']['class'], ['args' => $dispatcherConfig['filter']['args']]):null;
-    $eventDispatcher = $container->make(EventDispatcher::class, [
-        'store' => $container->make(Store::class, [
-            'filter' => $filter, 
-        ]),
-        'producer' => $container->make(MessagingProducer::class, ['config' => $dispatcherConfig['connectionConfig'], 'channel' => $dispatcherConfig['channel']]), 
-        'filter' => $filter, 
-        'builder' => $container->make(MessageBuilder::class, [
-            'mapper' =>  $container->make(
-                $dispatcherConfig['mapper']['class'], 
-                ['args' => $dispatcherConfig['mapper']['args']]
-            )
-        ])
-    ]);
+    $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
     $eventDispatcher->start();
 }]);
 $httpServer->addProcess($process);
 
-
 $httpServer->on(
     "start",
-    function (HttpServer $httpServer) {
+    function (HttpServer $httpServer) use ($timer, $dispatcherConfig, $container) {
+        $timer->tick(2*60*1000, function() use ($dispatcherConfig, $container){
+            echo "Priodically checking for undispatched events...\n";
+            $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
+            $eventDispatcher->dispatchUndispatched();
+        });
         echo "HTTP httpServer is started.\n";
     }
 );
@@ -61,3 +57,20 @@ $httpServer->on(
 );
 
 $httpServer->start();
+
+function buildDispatcher(array $config, Container $container):EventDispatcher{
+    $filter = $config['filter']?$container->make($config['filter']['class'], ['args' => $config['filter']['args']]):null;
+    return  $container->make(EventDispatcher::class, [
+        'store' => $container->make(Store::class, [
+            'filter' => $filter, 
+        ]),
+        'producer' => $container->make(MessagingProducer::class, ['config' => $config['connectionConfig'], 'channel' => $config['channel']]), 
+        'filter' => $filter, 
+        'builder' => $container->make(MessageBuilder::class, [
+            'mapper' =>  $container->make(
+                $config['mapper']['class'], 
+                ['args' => $config['mapper']['args']]
+            )
+        ])
+    ]);
+}

@@ -15,8 +15,7 @@ class DefaultDispatcher implements Dispatcher
         protected Store $store, 
         protected Producer $producer, 
         protected Filter $filter,
-        protected MessageBuilder $builder)
-
+        protected MessageBuilder $builder) 
     {
         
     }
@@ -36,6 +35,11 @@ class DefaultDispatcher implements Dispatcher
         while (true) {
             $this->store->listen(dispatcher:$this);
         }
+    }
+
+    public function dispatchUndispatched(): void
+    {
+        $this->store->dispatchAllUndispatched(dispatcher:$this);
     }
 
 }

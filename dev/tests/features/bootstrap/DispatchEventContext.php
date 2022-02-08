@@ -121,12 +121,12 @@ class DispatchEventContext implements Context
         $consumer->acknowledge($message);
 
         $expectedMessage = self::$kafkaContext->createMessage('{"akey":"avalue"}', [
-            'id' => $this->lastEventId,
-            'timestamp' => '2022-01-28T12:23:56'
+            'id' => (string)$this->lastEventId,
+            'timestamp' => '2022-01-28 12:23:56'
         ], [
             'name' => $this->getFilterMatchingEventName(),
-            'aggregate_id' => 2,
-            'aggregate_version' => 1
+            'aggregate_id' => "2",
+            'aggregate_version' => "1"
         ]);
         $expectedMessage->setKey(2);
 

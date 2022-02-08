@@ -12,4 +12,6 @@ interface Dispatcher
     public function dispatch(array $eventData):bool;
     
     public function start():void;
+
+    public function dispatchUndispatched():void;
 }

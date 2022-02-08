@@ -19,11 +19,11 @@ class DefaultMessageMapper implements MessageMapper
     public function map(array $data, Message $message): Message
     {
         return $message->withBody(json_encode($data['data']))
-            ->withProperty('timestamp', $data['timestamp'])
-            ->withProperty('id', $data['id'])
-            ->withHeader('name', $data['name'])
-            ->withHeader('aggregate_id', $data['aggregate_id'])
-            ->withHeader('aggregate_version', $data['aggregate_version'])
+            ->withProperty('timestamp', date('Y-m-d H:i:s', strtotime($data['timestamp'])))
+            ->withProperty('id', (string)$data['id'])
+            ->withHeader('name', (string)$data['name'])
+            ->withHeader('aggregate_id', (string)$data['aggregate_id'])
+            ->withHeader('aggregate_version', (string)$data['aggregate_version'])
             ->withKey($data[$this->keyAttr]);
     }
 }

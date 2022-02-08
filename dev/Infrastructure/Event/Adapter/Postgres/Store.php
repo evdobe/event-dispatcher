@@ -38,6 +38,10 @@ class Store implements EventStore
         UPDATE event SET dispatched=true, dispatched_at=NOW() WHERE id=:id and dispatched=false;
     ";
 
+    protected const SELECT_UNDISPATCHED_EVENTS_SQL = "
+        SELECT * FROM event AS NEW where NEW.dispatched = false %%filter_matcher%% ORDER BY id;
+    ";
+
     protected const LISTEN_TIMEOUT = 60*10000;
 
     public function __construct(protected ?Filter $filter = null)
@@ -58,12 +62,31 @@ class Store implements EventStore
         $this->dispatch(eventData:$eventData, dispatcher:$dispatcher);
     }
 
+    public function dispatchAllUndispatched(Dispatcher $dispatcher):void
+    {
+        $data = $this->con
+            ->query(str_replace("%%filter_matcher%%", $this->getFilterMatcher(), SELF::SELECT_UNDISPATCHED_EVENTS_SQL), \PDO::FETCH_ASSOC)
+            ->fetchAll();
+        foreach ($data as $eventData){
+            $eventData['data'] = json_decode($eventData['data'], true);
+            $this->dispatch(eventData:$eventData, dispatcher:$dispatcher);
+        }
+    }
+
+    protected function getFilterMatcher():string{
+        $filterMatcher = '';
+        if ($this->filter && $matcherStr = $this->filter->getSqlMatcher()){
+            $filterMatcher = "AND (".$matcherStr.")";
+        }
+        return $filterMatcher;
+    }
+
     protected function setUpListener(){
         $filterMatcher = '';
         if ($this->filter && $matcherStr = $this->filter->getSqlMatcher()){
             $filterMatcher = "AND (".$matcherStr.")";
         }
-        $this->con->exec(str_replace("%%filter_matcher%%", $filterMatcher, SELF::EVENT_NOTIFY_PROCEDURE_SQL));
+        $this->con->exec(str_replace("%%filter_matcher%%", $this->getFilterMatcher(), SELF::EVENT_NOTIFY_PROCEDURE_SQL));
         try {
             $this->con->exec(SELF::EVENT_NOTIFY_TRIGGER_SQL);
         }
