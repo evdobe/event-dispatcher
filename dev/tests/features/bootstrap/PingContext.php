@@ -42,7 +42,7 @@ class PingContext implements Context
     public function iDoHttpGet()
     {
         $this->curl = new Curl();
-        $this->curl->get('http://event-listener:'.$this->port);
+        $this->curl->get('http://event-dispatcher:'.$this->port);
     }
 
     /**

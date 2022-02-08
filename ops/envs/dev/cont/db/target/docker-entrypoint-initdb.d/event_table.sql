@@ -28,8 +28,8 @@ SET default_with_oids = false;
 CREATE TABLE public.event (
     id integer NOT NULL,
     "name" text NOT NULL,
-    channel text NOT NULL,
-    correlation_id integer NOT NULL,
+    channel text DEFAULT NULL,
+    correlation_id integer DEFAULT NULL,
     aggregate_id integer NOT NULL,
     aggregate_version integer NOT NULL,
     data jsonb NOT NULL,

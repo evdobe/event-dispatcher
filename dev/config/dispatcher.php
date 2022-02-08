@@ -12,15 +12,19 @@ $connectionConfig = [
 $channel = getenv('EVENT_CHANNEL');
 
 $eventFilterStr = getenv('EVENT_FILTER');
-$eventFilterConfigParts = array_map(function(string $row){
-    return trim($row);
-},explode('|', $eventFilterStr));
-
-$eventFilterClassName = array_shift($eventFilterConfigParts);
-$eventFilterConfig = [
-    'class' => $eventFilterClassName?$eventFilterClassName:Filter::class,
-    'args' => array_values($eventFilterConfigParts)
-];
+if (empty($eventFilterStr)){
+    $eventFilterConfig = null;
+}
+else {
+    $eventFilterConfigParts = array_map(function(string $row){
+        return trim($row);
+    },explode('|', $eventFilterStr));
+    $eventFilterClassName = array_shift($eventFilterConfigParts);
+    $eventFilterConfig = [
+        'class' => $eventFilterClassName?$eventFilterClassName:Filter::class,
+        'args' => array_values($eventFilterConfigParts)
+    ];
+}
 
 $messageMapperStr = getenv('MESSAGE_MAPPER');
 $messageMapperConfigParts = array_map(function(string $row){

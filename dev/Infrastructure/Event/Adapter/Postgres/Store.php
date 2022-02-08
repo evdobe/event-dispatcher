@@ -53,6 +53,7 @@ class Store implements EventStore
             return;
         }
         $eventData = json_decode($notification['payload'], true);
+        echo "Received notification for event with id = ".$eventData ['id']."\n";
         $this->dispatch(eventData:$eventData, dispatcher:$dispatcher);
     }
 
@@ -73,7 +74,7 @@ class Store implements EventStore
         $this->con->exec("LISTEN event;");
     }
 
-    protected function dispatch(array $eventData, Dispatcher $dispatcher){
+    protected function dispatch(array $eventData, Dispatcher $dispatcher):void{
         $this->con->beginTransaction();
         try {
             $statement = $this->con->prepare(self::UPDATE_EVENT_SQL);
@@ -86,6 +87,9 @@ class Store implements EventStore
             if ($dispatcher->dispatch(eventData: $eventData)){
                 $this->con->commit();
                 return;
+            }
+            else {
+                echo "Event with id ".$eventData['id']." skipped by dispatcher.\n";
             }
             $this->con->rollBack();
         }

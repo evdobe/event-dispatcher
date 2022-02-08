@@ -36,6 +36,7 @@ class Producer implements ApplicationProducer
             properties: $message->getProperties(),
             headers: $message->getHeaders()
         );
+        $kafkaMessage->setKey($message->getKey());
         $this->delegate->send(destination:$this->topic, message:$kafkaMessage);
         
     }

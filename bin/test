@@ -6,10 +6,10 @@ shift 1
 
 if [ "$TYPE" == "integration" ] || [ -z "$TYPE" ]
 then
-    $PARENT_PATH/env dev exec event-listener vendor/bin/behat $@
+    $PARENT_PATH/env dev exec event-dispatcher vendor/bin/behat $@
 fi
 if [ "$TYPE" == "unit" ] || [ -z "$TYPE" ]
 then
-    $PARENT_PATH/env dev exec event-listener vendor/bin/phpunit $@ tests/unit
+    $PARENT_PATH/env dev exec event-dispatcher vendor/bin/phpunit $@ tests/unit
 fi
 

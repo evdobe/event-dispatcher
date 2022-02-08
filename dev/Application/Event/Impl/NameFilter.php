@@ -15,7 +15,7 @@ class NameFilter implements Filter
 
     public function matches(array $eventData): bool
     {
-        return in_array($eventData, $this->names);
+        return in_array($eventData['name'], $this->names);
     }
 
 }
