@@ -33,8 +33,9 @@ $process = $container->make(Process::class, ["callback" => function($process) us
         'filter' => $messagingConfig['filter']?$container->make($messagingConfig['filter']['class'], ['args' => $messagingConfig['filter']['args']]):null, 
         'builder' => $container->make(MessageBuilder::class, [
             'mapper' =>  $container->make(
-                $messagingConfig['mapper'] && $messagingConfig['mapper']['class']?$messagingConfig['mapper']['class']:MessageMapper::class, 
-                ['args' => $messagingConfig['mapper'] && $messagingConfig['mapper']['args']?$messagingConfig['mapper']['args']:[]])
+                $messagingConfig['mapper']['class'], 
+                ['args' => $messagingConfig['mapper']['args']]
+            )
         ])
     ]);
     $eventDispatcher->start();
