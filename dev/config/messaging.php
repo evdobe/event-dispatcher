@@ -18,22 +18,24 @@ $eventFilterConfigParts = array_map(function(string $row){
 
 $eventFilterClassName = array_shift($eventFilterConfigParts);
 $eventFilterConfig = [
-    'filter' => $eventFilterClassName?$eventFilterClassName:Filter::class,
+    'class' => $eventFilterClassName?$eventFilterClassName:Filter::class,
     'args' => array_values($eventFilterConfigParts)
 ];
 
-$messageBuilderStr = getenv('MeSSAGE_BUILDER');
+$messageBuilderStr = getenv('MESSAGE_BUILDER');
 $messageBuilderConfigParts = array_map(function(string $row){
     return trim($row);
 },explode('|', $messageBuilderStr));
 
 $messageBuilderClassName = array_shift($messageBuilderConfigParts);
 $messageBuilderConfig = [
-    'builder' => $messageBuilderClassName?$messageBuilderClassName:MessageBuilder::class,
+    'class' => $messageBuilderClassName?$messageBuilderClassName:MessageBuilder::class,
     'args' => array_values($messageBuilderConfigParts)
 ];
 
 return [
-    'eventFilter' => $eventFilterConfig,
-    'messageBuilder' => $messageBuilderConfig
+    'channel' => $channel,
+    'connectionConfig' => $connectionConfig,
+    'filter' => $eventFilterConfig,
+    'builder' => $messageBuilderConfig
 ];

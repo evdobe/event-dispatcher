@@ -5,10 +5,11 @@ return [
     \Infrastructure\Http\Adapter\Swoole\Server::class =>  DI\autowire()
         ->constructorParameter('port', intval(getenv('HTTP_PORT'))),
     \Application\Http\Handler::class => DI\get(\Application\Http\Impl\PingHandler::class),
-    \Application\Messaging\Consumer::class => DI\autowire(\Infrastructure\Messaging\Adapter\EnqueueRdkafka\Consumer::class),
+    \Application\Messaging\Producer::class => DI\autowire(\Infrastructure\Messaging\Adapter\EnqueueRdkafka\Producer::class),
     \Application\Messaging\Handler::class => DI\autowire(\Application\Messaging\Impl\EventHandler::class),
     \Application\Execution\Process::class => DI\autowire(\Infrastructure\Execution\Adapter\Swoole\Process::class),
-    \Application\Event\Store::class => DI\autowire(\Infrastructure\Event\Adapter\Postgres\Store::class)
-        ->constructorParameter('mapper', DI\get(Infrastructure\Event\Adapter\Pdo\Mapper::class)),
+    \Application\Event\Store::class => DI\autowire(\Infrastructure\Event\Adapter\Postgres\Store::class),
+    \Application\Messaging\MessageBuilder::class => DI\autowire(\Infrastructure\Messaging\Adapter\EnqueueRdkafka\MessageBuilder::class),
+    \Application\Event\Dispatcher::class =>  DI\autowire(\Application\Event\Impl\DefaultDispatcher::class),
     
 ];

@@ -4,7 +4,7 @@ namespace Application\Messaging;
 
 interface Producer
 {
-    public function __construct(array $config);
+    public function __construct(array $config, string $channel);
 
     public function send(Message $message):void;
 

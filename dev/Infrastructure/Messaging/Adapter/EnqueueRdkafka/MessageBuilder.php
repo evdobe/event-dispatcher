@@ -10,10 +10,10 @@ class MessageBuilder implements ApplicationMessageBuilder
 {
     protected string $keyAttr = 'aggregateId';
     
-    public function __construct(array $arg = [])
+    public function __construct(array $args = [])
     {
-        if (!empty($arg)){
-            $this->keyAttr = $arg[0];
+        if (!empty($args)){
+            $this->keyAttr = $args[0];
         }
     }
 

@@ -8,8 +8,8 @@ use Application\Http\Request as HttpRequest;
 use Application\Http\Response as HttpResponse;
 use Application\Http\Handler as HttpHandler;
 
-use Application\Messaging\Consumer as MessagingConsumer;
-use Application\Messaging\Handler as MessagingHandler;
+use Application\Event\Dispatcher as EventDispatcher;
+use Application\Messaging\Producer as MessagingProducer;
 
 use Application\Execution\Process;
 
@@ -22,23 +22,19 @@ $httpHandler = $container->get(HttpHandler::class);
 
 $messagingConfig = include('config/messaging.php');
 
-foreach ($messagingConfig['channels'] as $channel => $handlerConfig){
-    $process = $container->make(Process::class, ["callback" => function($process) use ($messagingConfig, $container, $channel, $handlerConfig){
-        echo "Starting process...\n";
-        $messagingConsumer = $container->make(MessagingConsumer::class, [
-            'config' => $messagingConfig['connection'],
-            'channel' => $channel, 
-            'invalidChannel' => $messagingConfig['invalidChannel'],
-            'handler' => $container->make(MessagingHandler::class, [
-                'store' => $container->get(Store::class),
-                'filter' => $handlerConfig['filter']?$container->make($handlerConfig['filter']['class'], ['arg' => $handlerConfig['filter']['arg']]):null, 
-                'translator' => $handlerConfig['translator']?$container->make($handlerConfig['translator']['class'], ['arg' => $handlerConfig['translator']['arg']]):null, 
-            ])
-        ]);
-        $messagingConsumer->start();
-    }]);
-    $httpServer->addProcess($process);
-}
+
+$process = $container->make(Process::class, ["callback" => function($process) use ($messagingConfig, $container){
+    echo "Starting process...\n";
+    $eventDispatcher = $container->make(EventDispatcher::class, [
+        'store' => $container->get(Store::class),
+        'producer' => $container->make(MessagingProducer::class, ['config' => $messagingConfig['connectionConfig'], 'channel' => $messagingConfig['channel']]), 
+        'filter' => $messagingConfig['filter']?$container->make($messagingConfig['filter']['class'], ['args' => $messagingConfig['filter']['args']]):null, 
+        'builder' => $messagingConfig['builder']?$container->make($messagingConfig['builder']['class'], ['args' => $messagingConfig['builder']['args']]):null, 
+    ]);
+    $eventDispatcher->start();
+}]);
+$httpServer->addProcess($process);
+
 
 $httpServer->on(
     "start",
