@@ -3,30 +3,20 @@
 namespace Infrastructure\Messaging\Adapter\EnqueueRdkafka;
 
 use Application\Messaging\MessageBuilder as ApplicationMessageBuilder;
-
+use Application\Messaging\MessageMapper;
 use Enqueue\RdKafka\RdKafkaMessage;
 
 class MessageBuilder implements ApplicationMessageBuilder
 {
-    protected string $keyAttr = 'aggregateId';
     
-    public function __construct(array $args = [])
+    public function __construct(protected MessageMapper $mapper)
     {
-        if (!empty($args)){
-            $this->keyAttr = $args[0];
-        }
+
     }
 
     public function build(array $data): Message
     {
         $message = new Message(new RdKafkaMessage());
-        $message->withBody($data['data'])
-            ->withProperty('timestamp', $data['timestamp'])
-            ->withProperty('id', $data['id'])
-            ->withHeader('name', $data['name'])
-            ->withHeader('aggregateId', $data['aggregateId'])
-            ->withHeader('aggregateVersion', $data['aggregateVersion']);
-        $message->withKey($data[$this->keyAttr]);
-        return $message;   
+        return $this->mapper->map(data: $data, message: $message);   
     }
 }

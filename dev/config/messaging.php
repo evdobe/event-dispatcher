@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 use Application\Event\Filter;
-use Application\Messaging\MessageBuilder;
+use Application\Messaging\MessageMapper;
 
 $connectionConfig = [
     'global' => [
@@ -22,20 +22,20 @@ $eventFilterConfig = [
     'args' => array_values($eventFilterConfigParts)
 ];
 
-$messageBuilderStr = getenv('MESSAGE_BUILDER');
-$messageBuilderConfigParts = array_map(function(string $row){
+$messageMapperStr = getenv('MESSAGE_MAPPER');
+$messageMapperConfigParts = array_map(function(string $row){
     return trim($row);
-},explode('|', $messageBuilderStr));
+},explode('|', $messageMapperStr));
 
-$messageBuilderClassName = array_shift($messageBuilderConfigParts);
-$messageBuilderConfig = [
-    'class' => $messageBuilderClassName?$messageBuilderClassName:MessageBuilder::class,
-    'args' => array_values($messageBuilderConfigParts)
+$messageMapperClassName = array_shift($messageMapperConfigParts);
+$messageMapperConfig = [
+    'class' => $messageMapperClassName?$messageMapperClassName:MessageMapper::class,
+    'args' => array_values($messageMapperConfigParts)
 ];
 
 return [
     'channel' => $channel,
     'connectionConfig' => $connectionConfig,
     'filter' => $eventFilterConfig,
-    'builder' => $messageBuilderConfig
+    'mapper' => $messageMapperConfig
 ];

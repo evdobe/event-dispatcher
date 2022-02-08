@@ -12,6 +12,8 @@ use Application\Event\Dispatcher as EventDispatcher;
 use Application\Messaging\Producer as MessagingProducer;
 
 use Application\Execution\Process;
+use Application\Messaging\MessageBuilder;
+use Application\Messaging\MessageMapper;
 
 $builder = new DI\ContainerBuilder();
 $builder->addDefinitions('config/di.php');
@@ -29,7 +31,11 @@ $process = $container->make(Process::class, ["callback" => function($process) us
         'store' => $container->get(Store::class),
         'producer' => $container->make(MessagingProducer::class, ['config' => $messagingConfig['connectionConfig'], 'channel' => $messagingConfig['channel']]), 
         'filter' => $messagingConfig['filter']?$container->make($messagingConfig['filter']['class'], ['args' => $messagingConfig['filter']['args']]):null, 
-        'builder' => $messagingConfig['builder']?$container->make($messagingConfig['builder']['class'], ['args' => $messagingConfig['builder']['args']]):null, 
+        'builder' => $container->make(MessageBuilder::class, [
+            'mapper' =>  $container->make(
+                $messagingConfig['mapper'] && $messagingConfig['mapper']['class']?$messagingConfig['mapper']['class']:MessageMapper::class, 
+                ['args' => $messagingConfig['mapper'] && $messagingConfig['mapper']['args']?$messagingConfig['mapper']['args']:[]])
+        ])
     ]);
     $eventDispatcher->start();
 }]);
