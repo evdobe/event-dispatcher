@@ -132,4 +132,62 @@ class DispatchEventContext implements Context
         Assert::that($message->getKey())->eq($expectedMessage->getKey());
     }
 
+    /**
+     * @When an event not matching dispatcher filter is inserted in db
+     */
+    public function anEventNotMatchingDispatcherFilterIsInsertedInDb()
+    {
+        $statement = $this->con->prepare(self::NEW_EVENT_INSERT_SQL);
+        $statement->execute(
+            [
+                ':name' => 'notmatchingname',
+                ':aggregate_id' => 2,
+                ':aggregate_version' => 1,
+                ':data' => '{"akey":"avalue"}',
+                ':timestamp' => '2022-01-28 12:23:56'
+            ]
+        );
+        $this->lastEventId = $this->con->lastInsertId();
+    }
+
+    /**
+     * @Then dispatcher should not produce a message with event data on event channel
+     */
+    public function dispatcherShouldNotProduceAMessageWithEventDataOnEventChannel()
+    {
+        $topic = self::$kafkaContext->createTopic($this->eventChannelName);
+        $topic->setPartition(0);
+        $consumer = self::$kafkaContext->createConsumer($topic);
+        $message = $consumer->receive(10000);
+        Assert::that($message)->null();
+    }
+
+    /**
+     * @Then the event should be marked as dipatched in db
+     */
+    public function theEventShouldBeMarkedAsDipatchedInDb()
+    {
+        $stmt = $this->con->prepare('SELECT "dispatched", "dispatched_at" FROM event where id = :id');
+        $stmt->execute(['id' => $this->lastEventId]); 
+        $data = $stmt->fetch();
+
+        Assert::that($data['dispatched'])->true();
+        Assert::that($data['dispatched_at'])->notNull();
+    }
+
+    /**
+     * @Then the event should not be marked as dipatched in db
+     */
+    public function theEventShouldNotBeMarkedAsDipatchedInDb()
+    {
+        $stmt = $this->con->prepare('SELECT "dispatched", "dispatched_at" FROM event where id = :id');
+        $stmt->execute(['id' => $this->lastEventId]); 
+        $data = $stmt->fetch();
+
+        Assert::that($data['dispatched'])->false();
+        Assert::that($data['dispatched_at'])->null();
+    }
+
+
+
 }
