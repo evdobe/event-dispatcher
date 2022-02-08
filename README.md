@@ -1,4 +1,4 @@
-# Event listener
+# Event dispatcher
 
 A process that listens to notifications from an event store and publishes new events to a messaging channel.
 
@@ -6,7 +6,7 @@ Prerequisites:
 
 - An event channel 
 - An event store
-- An event router
-- A Message bus adapter
-- An Event store adapter
+- A Message mapper
+- An event filter (optionally)
 - A process executor
+- A timer
