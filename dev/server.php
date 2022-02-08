@@ -22,19 +22,19 @@ $container = $builder->build();
 $httpServer = $container->get(HttpServer::class);
 $httpHandler = $container->get(HttpHandler::class);
 
-$messagingConfig = include('config/messaging.php');
+$dispatcherConfig = include('config/dispatcher.php');
 
 
-$process = $container->make(Process::class, ["callback" => function($process) use ($messagingConfig, $container){
+$process = $container->make(Process::class, ["callback" => function($process) use ($dispatcherConfig, $container){
     echo "Starting process...\n";
     $eventDispatcher = $container->make(EventDispatcher::class, [
         'store' => $container->get(Store::class),
-        'producer' => $container->make(MessagingProducer::class, ['config' => $messagingConfig['connectionConfig'], 'channel' => $messagingConfig['channel']]), 
-        'filter' => $messagingConfig['filter']?$container->make($messagingConfig['filter']['class'], ['args' => $messagingConfig['filter']['args']]):null, 
+        'producer' => $container->make(MessagingProducer::class, ['config' => $dispatcherConfig['connectionConfig'], 'channel' => $dispatcherConfig['channel']]), 
+        'filter' => $dispatcherConfig['filter']?$container->make($dispatcherConfig['filter']['class'], ['args' => $dispatcherConfig['filter']['args']]):null, 
         'builder' => $container->make(MessageBuilder::class, [
             'mapper' =>  $container->make(
-                $messagingConfig['mapper']['class'], 
-                ['args' => $messagingConfig['mapper']['args']]
+                $dispatcherConfig['mapper']['class'], 
+                ['args' => $dispatcherConfig['mapper']['args']]
             )
         ])
     ]);
