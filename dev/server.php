@@ -34,6 +34,7 @@ $process = $container->make(Process::class, ["callback" => function($process) us
     echo "Starting process...\n";
     $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
     $eventDispatcher->start();
+    sleep(1);
 }]);
 $httpServer->addProcess($process);
 
@@ -44,6 +45,7 @@ $httpServer->on(
             echo "Priodically checking for undispatched events...\n";
             $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
             $eventDispatcher->dispatchUndispatched();
+            sleep(1);
         });
         echo "HTTP httpServer is started.\n";
     }
