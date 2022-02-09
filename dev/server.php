@@ -41,9 +41,10 @@ $httpServer->addProcess($process);
 $httpServer->on(
     "start",
     function (HttpServer $httpServer) use ($timer, $dispatcherConfig, $container) {
-        $timer->tick(2*60*1000, function() use ($dispatcherConfig, $container){
+        $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
+        $eventDispatcher->dispatchUndispatched();
+        $timer->tick(2*60*1000, function() use ($dispatcherConfig, $container, $eventDispatcher){
             echo "Priodically checking for undispatched events...\n";
-            $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
             $eventDispatcher->dispatchUndispatched();
             sleep(1);
         });

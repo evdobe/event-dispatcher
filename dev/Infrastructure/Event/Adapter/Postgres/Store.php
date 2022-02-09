@@ -58,7 +58,7 @@ class Store implements EventStore
             return;
         }
         $eventData = json_decode($notification['payload'], true);
-        echo "Received notification for event with id = ".$eventData ['id']."\n";
+        echo "Received notification for event with id = ".$eventData['id']."\n";
         $this->dispatch(eventData:$eventData, dispatcher:$dispatcher);
     }
 
@@ -69,6 +69,7 @@ class Store implements EventStore
             ->fetchAll();
         foreach ($data as $eventData){
             $eventData['data'] = json_decode($eventData['data'], true);
+            echo "Dispatching undispatched event with id = ".$eventData['id']."\n";
             $this->dispatch(eventData:$eventData, dispatcher:$dispatcher);
         }
     }
