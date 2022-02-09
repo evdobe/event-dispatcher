@@ -11,5 +11,6 @@ return [
     \Application\Messaging\MessageMapper::class => DI\autowire(\Application\Messaging\Impl\DefaultMessageMapper::class),
     \Application\Messaging\MessageBuilder::class => DI\autowire(\Infrastructure\Messaging\Adapter\EnqueueRdkafka\MessageBuilder::class),
     \Application\Event\Dispatcher::class =>  DI\autowire(\Application\Event\Impl\DefaultDispatcher::class),
-    \Application\Execution\Timer::class => DI\autowire(\Infrastructure\Execution\Adapter\Swoole\Timer::class)
+    \Application\Execution\Timer::class => DI\autowire(\Infrastructure\Execution\Adapter\Swoole\Timer::class),
+    \Application\Event\Filter::class => DI\autowire(\Application\Event\Impl\NameFilter::class),
 ];
