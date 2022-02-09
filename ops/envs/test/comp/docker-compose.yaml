@@ -1,7 +1,7 @@
 services:
-  event-listener:
+  event-dispatcher:
     build: 
-      dockerfile: ops/envs/prod/cont/event-listener/Dockerfile
+      dockerfile: ops/envs/prod/cont/event-dispatcher/Dockerfile
       context: ../../../../
     environment:
       HOST_GID: ${HOST_UID}
@@ -10,9 +10,9 @@ services:
       TZ: ${TIME_ZONE}
       MESSAGE_BROKER_HOST: ${MESSAGE_BROKER_HOST}
       MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
-      MESSAGE_CONSUMER_GROUP: ${MESSAGE_CONSUMER_GROUP}
-      EVENT_CHANNELS: ${EVENT_CHANNELS}
-      INVALID_CHANNEL: ${INVALID_CHANNEL}
+      EVENT_CHANNEL: ${EVENT_CHANNEL}
+      EVENT_FILTER: ${EVENT_FILTER}
+      MESSAGE_MAPPER: ${MESSAGE_MAPPER}
       STORE_DB_HOST: db
       STORE_DB_USER: ${STORE_DB_USER}
       STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
@@ -72,9 +72,9 @@ services:
       TZ: ${TIME_ZONE}
       MESSAGE_BROKER_HOST: ${MESSAGE_BROKER_HOST}
       MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
-      MESSAGE_CONSUMER_GROUP: ${MESSAGE_CONSUMER_GROUP}
-      EVENT_CHANNELS: ${EVENT_CHANNELS}
-      INVALID_CHANNEL: ${INVALID_CHANNEL}
+      EVENT_CHANNEL: ${EVENT_CHANNEL}
+      EVENT_FILTER: ${EVENT_FILTER}
+      MESSAGE_MAPPER: ${MESSAGE_MAPPER}
       STORE_DB_HOST: db
       STORE_DB_USER: ${STORE_DB_USER}
       STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
@@ -82,5 +82,5 @@ services:
     depends_on:
       - kafka
       - db
-      - event-listener
+      - event-dispatcher
       
