@@ -15,6 +15,8 @@ class Store implements EventStore
 
     protected PDO $con;
 
+    protected bool $listenerSetUp = false;
+
     protected const EVENT_NOTIFY_PROCEDURE_SQL = "
         CREATE OR REPLACE FUNCTION public.event_notify()
         RETURNS trigger
@@ -44,13 +46,18 @@ class Store implements EventStore
 
     protected const LISTEN_TIMEOUT = 60*10000;
 
-    public function __construct(protected ?Filter $filter = null)
+    public function __construct(protected ?Filter $filter = null, bool $setupListener = false)
     {
         $this->con = new PDO("pgsql:host=".getenv('STORE_DB_HOST').";dbname=".getenv('STORE_DB_NAME'), getenv('STORE_DB_USER'), getenv('STORE_DB_PASSWORD'));
-        $this->setUpListener();
+        if ($setupListener){
+            $this->setUpListener();
+        }
     }
 
     public function listen(Dispatcher $dispatcher):void{
+        if (!$this->listenerSetUp){
+            throw new \Exception('Listener is not set up!');
+        }
         echo "Listening for pgsql notifications...\n";
         $notification = $this->con->pgsqlGetNotify(PDO::FETCH_ASSOC, self::LISTEN_TIMEOUT);
         if (!$notification) {
@@ -101,6 +108,7 @@ class Store implements EventStore
             }    
         }
         $this->con->exec("LISTEN event;");
+        $this->listenerSetUp = true;
     }
 
     protected function dispatch(array $eventData, Dispatcher $dispatcher):void{

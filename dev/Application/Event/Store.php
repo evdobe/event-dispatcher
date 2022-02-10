@@ -4,7 +4,7 @@ namespace Application\Event;
 
 interface Store
 {
-    public function __construct(?Filter $filter = null);
+    public function __construct(?Filter $filter = null, bool $setupListener = false);
 
     public function listen(Dispatcher $dispatcher):void;
 

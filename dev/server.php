@@ -32,7 +32,7 @@ $dispatcherConfig = include('config/dispatcher.php');
 
 $process = $container->make(Process::class, ["callback" => function($process) use ($dispatcherConfig, $container){
     echo "Starting process...\n";
-    $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
+    $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container, setupListener:true);
     $eventDispatcher->start();
     sleep(1);
 }]);
@@ -41,7 +41,7 @@ $httpServer->addProcess($process);
 $httpServer->on(
     "start",
     function (HttpServer $httpServer) use ($timer, $dispatcherConfig, $container) {
-        $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container);
+        $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container, setupListener:false);
         $eventDispatcher->dispatchUndispatched();
         $timer->tick(2*60*1000, function() use ($dispatcherConfig, $container, $eventDispatcher){
             echo "Priodically checking for undispatched events...\n";
@@ -61,11 +61,12 @@ $httpServer->on(
 
 $httpServer->start();
 
-function buildDispatcher(array $config, Container $container):EventDispatcher{
+function buildDispatcher(array $config, Container $container, bool $setupListener):EventDispatcher{
     $filter = $config['filter']?$container->make($config['filter']['class'], ['args' => $config['filter']['args']]):null;
     return  $container->make(EventDispatcher::class, [
         'store' => $container->make(Store::class, [
             'filter' => $filter, 
+            'setupListener' => $setupListener
         ]),
         'producer' => $container->make(MessagingProducer::class, ['config' => $config['connectionConfig'], 'channel' => $config['channel']]), 
         'filter' => $filter, 
