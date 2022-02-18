@@ -42,6 +42,7 @@ $httpServer->on(
     "start",
     function (HttpServer $httpServer) use ($timer, $dispatcherConfig, $container) {
         $eventDispatcher = buildDispatcher(config:$dispatcherConfig, container: $container, setupListener:false);
+        echo "Checking for undispatched events...\n";
         $eventDispatcher->dispatchUndispatched();
         $timer->tick(2*60*1000, function() use ($dispatcherConfig, $container, $eventDispatcher){
             echo "Priodically checking for undispatched events...\n";

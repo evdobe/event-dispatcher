@@ -23,7 +23,7 @@ class Store implements EventStore
         AS \$function\$
         BEGIN
             IF NEW.dispatched = false %%filter_matcher%% THEN
-                PERFORM pg_notify('event', row_to_json(NEW)::text);
+                PERFORM pg_notify('event', NEW.id::text);
             END IF;
             RETURN NULL;
         END;
@@ -64,7 +64,11 @@ class Store implements EventStore
             echo "Timeout with no messages\n";
             return;
         }
-        $eventData = json_decode($notification['payload'], true);
+        $eventId = $notification['payload'];
+        $stmt = $this->con->prepare("SELECT * FROM event WHERE id=:id"); 
+        $stmt->execute(['id' => $eventId]); 
+        $eventData = $stmt->fetch();
+        $eventData['data'] = json_decode($eventData['data'], true);
         echo "Received notification for event with id = ".$eventData['id']."\n";
         $this->dispatch(eventData:$eventData, dispatcher:$dispatcher);
     }
