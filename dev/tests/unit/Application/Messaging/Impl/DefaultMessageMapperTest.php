@@ -15,6 +15,7 @@ class DefaultMessageMapperTest extends TestCase
             'id' => 27,
             'name' => 'eventName',
             'aggregate_id' => 12,
+            'correlation_id' => 123,
             'aggregate_version' => 13,
             'data' => ['key1' => 'value1', 'key2' => 'value2'],
             'timestamp' => '2022-01-27 12:03:23'
@@ -28,6 +29,7 @@ class DefaultMessageMapperTest extends TestCase
             ->withHeader(name: 'aggregate_version', value: '13')
             ->withProperty(name: 'timestamp', value: '2022-01-27 12:03:23')
             ->withProperty(name: 'id', value: '27')
+            ->withProperty(name: 'correlation_id', value: '123')
             ->withBody(body: '{"key1":"value1","key2":"value2"}')
             ->withKey('12')
         ;

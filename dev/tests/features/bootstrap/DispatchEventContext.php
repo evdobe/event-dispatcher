@@ -21,8 +21,8 @@ class DispatchEventContext implements Context
 {
 
     const NEW_EVENT_INSERT_SQL = 'INSERT INTO event 
-        (name, "aggregate_id", "aggregate_version", data, "timestamp") 
-        VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp)';
+        (name, "aggregate_id", "aggregate_version", data, "timestamp", "correlation_id") 
+        VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp, :correlation_id)';
 
     const ALREADY_DISPATCHED_EVENT_INSERT_SQL = 'INSERT INTO event 
         (name, "aggregate_id", "aggregate_version", data, "timestamp", "dispatched", "dispatched_at") 
@@ -102,7 +102,8 @@ class DispatchEventContext implements Context
                 ':aggregate_id' => 2,
                 ':aggregate_version' => 1,
                 ':data' => '{"akey":"avalue"}',
-                ':timestamp' => '2022-01-28 12:23:56'
+                ':timestamp' => '2022-01-28 12:23:56',
+                ':correlation_id' => 123
             ]
         );
         $this->lastEventId = $this->con->lastInsertId();
@@ -122,7 +123,8 @@ class DispatchEventContext implements Context
 
         $expectedMessage = self::$kafkaContext->createMessage('{"akey":"avalue"}', [
             'id' => (string)$this->lastEventId,
-            'timestamp' => '2022-01-28 12:23:56'
+            'timestamp' => '2022-01-28 12:23:56',
+            'correlation_id' => "123"
         ], [
             'name' => $this->getFilterMatchingEventName(),
             'aggregate_id' => "2",
@@ -148,7 +150,8 @@ class DispatchEventContext implements Context
                 ':aggregate_id' => 2,
                 ':aggregate_version' => 1,
                 ':data' => '{"akey":"avalue"}',
-                ':timestamp' => '2022-01-28 12:23:56'
+                ':timestamp' => '2022-01-28 12:23:56',
+                ':correlation_id' => null,
             ]
         );
         $this->lastEventId = $this->con->lastInsertId();

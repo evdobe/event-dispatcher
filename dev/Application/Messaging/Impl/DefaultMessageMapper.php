@@ -18,12 +18,18 @@ class DefaultMessageMapper implements MessageMapper
 
     public function map(array $data, Message $message): Message
     {
-        return $message->withBody(json_encode($data['data']))
+        $res =  $message->withBody(json_encode($data['data']))
             ->withProperty('timestamp', date('Y-m-d H:i:s', strtotime($data['timestamp'])))
             ->withProperty('id', (string)$data['id'])
             ->withHeader('name', (string)$data['name'])
             ->withHeader('aggregate_id', (string)$data['aggregate_id'])
             ->withHeader('aggregate_version', (string)$data['aggregate_version'])
             ->withKey($data[$this->keyAttr]);
+
+        if (!empty($data['correlation_id'])){
+            $res = $res->withProperty('correlation_id', (string)$data['correlation_id']);
+        }
+
+        return $res;
     }
 }
