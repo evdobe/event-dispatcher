@@ -29,7 +29,7 @@ class Message implements ApplicationMessage
         return $this->delegate->getProperties();
     }
 
-    public function getPropery(string $name, mixed $default = null):mixed{
+    public function getProperty(string $name, mixed $default = null):mixed{
         return $this->delegate->getProperty(name: $name, default: $default);
     }
 

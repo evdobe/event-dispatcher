@@ -13,7 +13,7 @@ interface Message
 
     public function getProperties():array;
 
-    public function getPropery(string $name, mixed $default = null):mixed;
+    public function getProperty(string $name, mixed $default = null):mixed;
 
     public function getKey():?string;
 
