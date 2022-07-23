@@ -1,0 +1,198 @@
+services:
+  event-dispatcher-1:
+    build: ../cont/event-dispatcher
+    environment:
+      HOST_GID: ${HOST_UID}
+      HOST_UID: ${HOST_UID}
+      HTTP_PORT: ${HTTP_PORT}
+      TZ: ${TIME_ZONE}
+      AUTORELOAD_PROGRAMS: "swoole"
+      AUTORELOAD_ANY_FILES: 0
+      MESSAGE_BROKER_HOST: kafka-1
+      MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
+      EVENT_CHANNEL: ${EVENT_CHANNEL}
+      EVENT_FILTER: ${EVENT_FILTER}
+      MESSAGE_MAPPER: ${MESSAGE_MAPPER}
+      STORE_DB_HOST: db
+      STORE_DB_USER: ${STORE_DB_USER}
+      STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
+      STORE_DB_NAME: ${STORE_DB_NAME}
+    expose: 
+    - ${HTTP_PORT}
+    ports: 
+    - 9501:${HTTP_PORT}
+    volumes:
+    - ../../../../dev:/var/www
+    depends_on:
+      - kafka-1
+      - db
+  event-dispatcher-2:
+    build: ../cont/event-dispatcher
+    environment:
+      HOST_GID: ${HOST_UID}
+      HOST_UID: ${HOST_UID}
+      HTTP_PORT: ${HTTP_PORT}
+      TZ: ${TIME_ZONE}
+      AUTORELOAD_PROGRAMS: "swoole"
+      AUTORELOAD_ANY_FILES: 0
+      MESSAGE_BROKER_HOST: kafka-2
+      MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
+      EVENT_CHANNEL: ${EVENT_CHANNEL}
+      EVENT_FILTER: ${EVENT_FILTER}
+      MESSAGE_MAPPER: ${MESSAGE_MAPPER}
+      STORE_DB_HOST: db
+      STORE_DB_USER: ${STORE_DB_USER}
+      STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
+      STORE_DB_NAME: ${STORE_DB_NAME}
+    expose: 
+    - ${HTTP_PORT}
+    ports: 
+    - 9502:${HTTP_PORT}
+    volumes:
+    - ../../../../dev:/var/www
+    depends_on:
+      - kafka-2
+      - db
+  event-dispatcher-3:
+    build: ../cont/event-dispatcher
+    environment:
+      HOST_GID: ${HOST_UID}
+      HOST_UID: ${HOST_UID}
+      HTTP_PORT: ${HTTP_PORT}
+      TZ: ${TIME_ZONE}
+      AUTORELOAD_PROGRAMS: "swoole"
+      AUTORELOAD_ANY_FILES: 0
+      MESSAGE_BROKER_HOST: kafka-3
+      MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}
+      EVENT_CHANNEL: ${EVENT_CHANNEL}
+      EVENT_FILTER: ${EVENT_FILTER}
+      MESSAGE_MAPPER: ${MESSAGE_MAPPER}
+      STORE_DB_HOST: db
+      STORE_DB_USER: ${STORE_DB_USER}
+      STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
+      STORE_DB_NAME: ${STORE_DB_NAME}
+    expose: 
+    - ${HTTP_PORT}
+    ports: 
+    - 9503:${HTTP_PORT}
+    volumes:
+    - ../../../../dev:/var/www
+    depends_on:
+      - kafka-3
+      - db
+
+  zookeeper-1:
+    image: evdobe/kafka:strimzi-0.27.0-kafka-3.0.0-ev2
+    command: [
+        "sh", "-c",
+        "/opt/scripts/zookeeper-entrypoint.sh"
+      ]
+    expose:
+    - 2181
+    - 2888
+    - 3888
+    environment:
+      LOG_DIR: /tmp/logs
+      ZOOKEEPER_ID: 1
+      ZOOKEEPER_SERVERS: 1=zookeeper-1:2888:3888;2=zookeeper-2:2888:3888;3=zookeeper-3:2888:3888
+  zookeeper-2:
+    image: evdobe/kafka:strimzi-0.27.0-kafka-3.0.0-ev2
+    command: [
+        "sh", "-c",
+        "/opt/scripts/zookeeper-entrypoint.sh"
+      ]
+    expose:
+    - 2181
+    - 2888
+    - 3888
+    environment:
+      LOG_DIR: /tmp/logs
+      ZOOKEEPER_ID: 2
+      ZOOKEEPER_SERVERS: 1=zookeeper-1:2888:3888;2=zookeeper-2:2888:3888;3=zookeeper-3:2888:3888
+  zookeeper-3:
+    image: evdobe/kafka:strimzi-0.27.0-kafka-3.0.0-ev2
+    command: [
+        "sh", "-c",
+        "/opt/scripts/zookeeper-entrypoint.sh"
+      ]
+    expose:
+    - 2181
+    - 2888
+    - 3888
+    environment:
+      LOG_DIR: /tmp/logs
+      ZOOKEEPER_ID: 3
+      ZOOKEEPER_SERVERS: 1=zookeeper-1:2888:3888;2=zookeeper-2:2888:3888;3=zookeeper-3:2888:3888
+  kafka-1:
+    image: evdobe/kafka:strimzi-0.27.0-kafka-3.0.0-ev2
+    command: [
+      "/opt/scripts/entrypoint.sh"
+    ]
+    depends_on:
+    - zookeeper-1
+    expose:
+    - 9092
+    - 29092
+    environment:
+      LOG_DIR: "/tmp/logs"
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://kafka-1:29092,INTERNAL://kafka-1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: EXTERNAL://:29092,INTERNAL://:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      KAFKA_CREATE_TOPICS_SEPARATOR: "$$'\n'"
+      KAFKA_CREATE_TOPICS: ${MESSAGE_TOPICS}
+
+  kafka-2:
+    image: evdobe/kafka:strimzi-0.27.0-kafka-3.0.0-ev2
+    command: [
+      "/opt/scripts/entrypoint.sh"
+    ]
+    depends_on:
+    - zookeeper-2
+    expose:
+    - 9092
+    - 29092
+    environment:
+      LOG_DIR: "/tmp/logs"
+      KAFKA_BROKER_ID: 2
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://kafka-2:29092,INTERNAL://kafka-2:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: EXTERNAL://:29092,INTERNAL://:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-2:2181,zookeeper-3:2181,zookeeper-1:2181
+      KAFKA_CREATE_TOPICS_SEPARATOR: "$$'\n'"
+      KAFKA_CREATE_TOPICS: ${MESSAGE_TOPICS}
+
+  kafka-3:
+    image: evdobe/kafka:strimzi-0.27.0-kafka-3.0.0-ev2
+    command: [
+      "/opt/scripts/entrypoint.sh"
+    ]
+    depends_on:
+    - zookeeper-3
+    expose:
+    - 9092
+    - 29092
+    environment:
+      LOG_DIR: "/tmp/logs"
+      KAFKA_BROKER_ID: 3
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://kafka-3:29092,INTERNAL://kafka-3:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: EXTERNAL://:29092,INTERNAL://:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-3:2181,zookeeper-1:2181,zookeeper-2:2181
+      KAFKA_CREATE_TOPICS_SEPARATOR: "$$'\n'"
+      KAFKA_CREATE_TOPICS: ${MESSAGE_TOPICS}
+
+  db:
+    build: ../cont/db/
+    environment:
+      POSTGRES_PASSWORD: "${STORE_DB_PASSWORD}"
+      POSTGRES_USER: "${STORE_DB_USER}"
+      POSTGRES_DB: "${STORE_DB_NAME}"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    expose:
+      - 5432
+      

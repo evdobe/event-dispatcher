@@ -122,11 +122,12 @@ class Store implements EventStore
             $statement->execute(['id' => $eventData['id']]);
             if ($statement->rowCount() != 1) {
                 $this->con->rollBack();
-                echo "!!!POSSIBLE ERROR??? Failed to update event with id ".$eventData['id']."! Maybe already dispatched? Skipping event.\n";
+                echo "Event with id ".$eventData['id']." already dispatched. Skipping event.\n";
                 return;
             }
             if ($dispatcher->dispatch(eventData: $eventData)){
                 $this->con->commit();
+                echo "Successfully dispatched event with id ".$eventData['id'].".\n";
                 return;
             }
             else {
