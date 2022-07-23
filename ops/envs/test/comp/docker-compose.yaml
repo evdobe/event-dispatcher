@@ -69,6 +69,7 @@ services:
       HOST_GID: ${HOST_UID}
       HOST_UID: ${HOST_UID}
       HTTP_PORT: ${HTTP_PORT}
+      HTTP_HOST: event-dispatcher
       TZ: ${TIME_ZONE}
       MESSAGE_BROKER_HOST: ${MESSAGE_BROKER_HOST}
       MESSAGE_BROKER_PORT: ${MESSAGE_BROKER_PORT}

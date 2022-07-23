@@ -15,6 +15,8 @@ class PingContext implements Context
 {
     protected int $port;
 
+    protected string $host;
+
     protected Curl $curl;
 
     /**
@@ -34,6 +36,7 @@ class PingContext implements Context
     public function theServicePortIsDefined()
     {
         $this->port = getenv('HTTP_PORT');
+        $this->host = getenv('HTTP_HOST')?:'localhost';
     }
 
     /**
@@ -42,7 +45,7 @@ class PingContext implements Context
     public function iDoHttpGet()
     {
         $this->curl = new Curl();
-        $this->curl->get('http://localhost:'.$this->port);
+        $this->curl->get('http://'.$this->host.':'.$this->port);
     }
 
     /**
