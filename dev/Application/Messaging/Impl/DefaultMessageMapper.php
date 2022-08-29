@@ -29,6 +29,9 @@ class DefaultMessageMapper implements MessageMapper
         if (!empty($data['correlation_id'])){
             $res = $res->withProperty('correlation_id', (string)$data['correlation_id']);
         }
+        if (!empty($data['user_id'])){
+            $res = $res->withProperty('user_id', (string)$data['user_id']);
+        }
 
         return $res;
     }
