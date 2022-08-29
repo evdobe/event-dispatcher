@@ -35,7 +35,7 @@ class DispatchEventContext implements Context
 
     protected PDO $con;
 
-    protected int $lastEventId;
+    protected int|string $lastEventId;
 
 
     /**
@@ -130,7 +130,7 @@ class DispatchEventContext implements Context
             'aggregate_id' => "2",
             'aggregate_version' => "1"
         ]);
-        $expectedMessage->setKey(2);
+        $expectedMessage->setKey('2');
 
         Assert::that($message->getBody())->eq($expectedMessage->getBody());
         Assert::that($message->getHeaders())->eq($expectedMessage->getHeaders());

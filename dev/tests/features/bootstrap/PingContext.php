@@ -13,7 +13,7 @@ use Assert\Assert;
  */
 class PingContext implements Context
 {
-    protected int $port;
+    protected int|string $port;
 
     protected string $host;
 

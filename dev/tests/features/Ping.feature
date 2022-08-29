@@ -1,3 +1,4 @@
+@ping
 Feature: Ping
     In order to check service health
     As an administrator
