@@ -41,7 +41,7 @@ class Store implements EventStore
     ";
 
     protected const SELECT_UNDISPATCHED_EVENTS_SQL = "
-        SELECT * FROM event AS NEW where NEW.dispatched = false %%filter_matcher%% ORDER BY id;
+        SELECT * FROM event AS NEW where NEW.dispatched = false %%filter_matcher%% ORDER BY id LIMIT 10000;
     ";
 
     protected const LISTEN_TIMEOUT = 60*10000;
