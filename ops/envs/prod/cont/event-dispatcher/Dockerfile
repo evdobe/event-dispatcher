@@ -33,6 +33,7 @@ RUN cd /tmp \
     && apt remove -y build-essential \
     && apt autoremove -y
 
+COPY ops/envs/prod/cont/event-dispatcher/target /
 COPY dev /var/www
 
 ENV TZ=Europe/Athens
