@@ -48,7 +48,7 @@ class Store implements EventStore
 
     public function __construct(protected ?Filter $filter = null, bool $setupListener = false)
     {
-        $this->con = new PDO("pgsql:host=".getenv('STORE_DB_HOST').";dbname=".getenv('STORE_DB_NAME'), getenv('STORE_DB_USER'), getenv('STORE_DB_PASSWORD'));
+        $this->con = new PDO("pgsql:host=".getenv('STORE_DB_HOST').";port=" . (getenv('DB_PORT') ?: '5432').";dbname=".getenv('STORE_DB_NAME'), getenv('STORE_DB_USER'), getenv('STORE_DB_PASSWORD'));
         if ($setupListener){
             $this->setUpListener();
         }
