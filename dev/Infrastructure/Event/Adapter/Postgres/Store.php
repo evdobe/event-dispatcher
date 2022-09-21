@@ -41,7 +41,7 @@ class Store implements EventStore
     ";
 
     protected const SELECT_UNDISPATCHED_EVENTS_SQL = "
-        SELECT * FROM event AS NEW where NEW.dispatched = false %%filter_matcher%% ORDER BY id LIMIT 10000;
+        SELECT * FROM event AS NEW where NEW.dispatched = false %%filter_matcher%% ORDER BY id LIMIT %%polling_select_limit%%;
     ";
 
     protected const LISTEN_TIMEOUT = 60*10000;
@@ -76,7 +76,7 @@ class Store implements EventStore
     public function dispatchAllUndispatched(Dispatcher $dispatcher):void
     {
         $data = $this->con
-            ->query(str_replace("%%filter_matcher%%", $this->getFilterMatcher(), SELF::SELECT_UNDISPATCHED_EVENTS_SQL), \PDO::FETCH_ASSOC)
+            ->query(str_replace("%%polling_select_limit%%", (getenv('POLLING_DB_SELECT_LIMIT') ?: '10000'), str_replace("%%filter_matcher%%", $this->getFilterMatcher(), SELF::SELECT_UNDISPATCHED_EVENTS_SQL)), \PDO::FETCH_ASSOC)
             ->fetchAll();
         foreach ($data as $eventData){
             $eventData['data'] = json_decode($eventData['data'], true);
