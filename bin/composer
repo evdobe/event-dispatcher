@@ -1,4 +1,4 @@
 #!/bin/bash
 PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-$PARENT_PATH/env dev exec event-listener composer --ignore-platform-req=ext-rdkafka $@
+$PARENT_PATH/env dev exec event-dispatcher composer --ignore-platform-req=ext-rdkafka $@
