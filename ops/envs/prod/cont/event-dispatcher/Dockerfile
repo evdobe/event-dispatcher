@@ -1,12 +1,12 @@
-FROM phpswoole/swoole:4.8-php8.1
+FROM phpswoole/swoole:5.1-php8.2
 
-ENV LIBRDKAFKA_VERSION v1.8.2 
+ENV LIBRDKAFKA_VERSION v2.2.0
 ENV BUILD_DEPS \
         autoconf \
         build-essential \
         git \
         libpcre3-dev \
-        python \
+        python-is-python3 \
         libzip-dev \
         zip \
         git \
