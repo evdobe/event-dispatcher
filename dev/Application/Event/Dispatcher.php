@@ -14,4 +14,6 @@ interface Dispatcher
     public function start():void;
 
     public function dispatchUndispatched():void;
+
+    public function pollProducer():void;
 }

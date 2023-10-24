@@ -17,7 +17,7 @@ class DefaultDispatcher implements Dispatcher
         protected Filter $filter,
         protected MessageBuilder $builder) 
     {
-        
+        $this->producer->setDeliverySuccessCallback($store->dispatchSuccessCallback(...));
     }
 
     public function dispatch(array $eventData): bool
@@ -32,6 +32,7 @@ class DefaultDispatcher implements Dispatcher
     
     public function start(): void
     {
+        echo "Listening for pgsql notifications...\n";
         while (true) {
             $this->store->listen(dispatcher:$this);
         }
@@ -40,6 +41,11 @@ class DefaultDispatcher implements Dispatcher
     public function dispatchUndispatched(): void
     {
         $this->store->dispatchAllUndispatched(dispatcher:$this);
+    }
+
+    public function pollProducer(): void
+    {
+        $this->producer->poll(0);
     }
 
 }

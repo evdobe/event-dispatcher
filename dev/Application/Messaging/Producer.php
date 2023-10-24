@@ -8,4 +8,8 @@ interface Producer
 
     public function send(Message $message):void;
 
+    public function setDeliverySuccessCallback(callable $callback):void;
+
+    public function poll(int $timeoutMs) : void;
+
 }

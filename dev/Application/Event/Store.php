@@ -9,4 +9,6 @@ interface Store
     public function listen(Dispatcher $dispatcher):void;
 
     public function dispatchAllUndispatched(Dispatcher $dispatcher):void;
+
+    public function dispatchSuccessCallback(string $eventId):void;
 }

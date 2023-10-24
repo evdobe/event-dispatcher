@@ -177,6 +177,7 @@ class DispatchEventContext implements Context
      */
     public function theEventShouldBeMarkedAsDipatchedInDb()
     {
+        sleep(2);
         $stmt = $this->con->prepare('SELECT "dispatched", "dispatched_at" FROM event where id = :id');
         $stmt->execute(['id' => $this->lastEventId]); 
         $data = $stmt->fetch();
@@ -190,6 +191,7 @@ class DispatchEventContext implements Context
      */
     public function theEventShouldNotBeMarkedAsDipatchedInDb()
     {
+        sleep(2);
         $stmt = $this->con->prepare('SELECT "dispatched", "dispatched_at" FROM event where id = :id');
         $stmt->execute(['id' => $this->lastEventId]); 
         $data = $stmt->fetch();
@@ -227,6 +229,50 @@ class DispatchEventContext implements Context
         $data = $stmt->fetch();
 
         Assert::that($data['dispatched_at'])->eq('2022-01-28 12:26:47');
+    }
+
+    /**
+     * @Given we stop kafka
+     */
+    public function weStopKafka()
+    {
+        echo "Stop the kafka container with `bin/env dev stop kafka` and then press any key to continue";
+    }
+
+    /**
+     * @Given kafka is down
+     */
+    public function kafkaIsDown()
+    {
+        // Disable canonical mode, so characters are available immediately
+        system('stty -icanon');
+        // Read a single character from the user
+        $input = fgetc(STDIN);
+        // Re-enable canonical mode
+        system('stty icanon');
+        echo "Assuming kafka is now stopped...\n";
+    }
+
+    /**
+     * @Then we start kafka
+     */
+    public function weStartKafka()
+    {
+        echo "Start the kafka container with `bin/env dev up -d kafka` and then press any key to continue";
+    }
+
+    /**
+     * @Then kafka is up
+     */
+    public function kafkaIsUp()
+    {
+        // Disable canonical mode, so characters are available immediately
+        system('stty -icanon');
+        // Read a single character from the user
+        $input = fgetc(STDIN);
+        // Re-enable canonical mode
+        system('stty icanon');
+        echo "Assuming kafka is now started...\n";
     }
 
 }

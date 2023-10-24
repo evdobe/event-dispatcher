@@ -44,7 +44,7 @@ class Store implements EventStore
         SELECT * FROM event AS NEW where NEW.dispatched = false %%filter_matcher%% ORDER BY id LIMIT %%polling_select_limit%%;
     ";
 
-    protected const LISTEN_TIMEOUT = 60*10000;
+    protected const LISTEN_TIMEOUT = 1000;
 
     public function __construct(protected ?Filter $filter = null, bool $setupListener = false)
     {
@@ -58,10 +58,9 @@ class Store implements EventStore
         if (!$this->listenerSetUp){
             throw new \Exception('Listener is not set up!');
         }
-        echo "Listening for pgsql notifications...\n";
+        $dispatcher->pollProducer();
         $notification = $this->con->pgsqlGetNotify(PDO::FETCH_ASSOC, self::LISTEN_TIMEOUT);
         if (!$notification) {
-            echo "Timeout with no messages\n";
             return;
         }
         $eventId = $notification['payload'];
@@ -116,28 +115,13 @@ class Store implements EventStore
     }
 
     protected function dispatch(array $eventData, Dispatcher $dispatcher):void{
-        $this->con->beginTransaction();
-        try {
-            $statement = $this->con->prepare(self::UPDATE_EVENT_SQL);
-            $statement->execute(['id' => $eventData['id']]);
-            if ($statement->rowCount() != 1) {
-                $this->con->rollBack();
-                echo "Event with id ".$eventData['id']." already dispatched. Skipping event.\n";
-                return;
-            }
-            if ($dispatcher->dispatch(eventData: $eventData)){
-                $this->con->commit();
-                echo "Successfully dispatched event with id ".$eventData['id'].".\n";
-                return;
-            }
-            else {
-                echo "Event with id ".$eventData['id']." skipped by dispatcher.\n";
-            }
-            $this->con->rollBack();
+        if (!$dispatcher->dispatch(eventData: $eventData)){
+            echo "Event with id ".$eventData['id']." skipped by dispatcher.\n";
         }
-        catch(\Exception $e) {
-            $this->con->rollBack();
-            throw $e;
-        } 
+    }
+
+    public function dispatchSuccessCallback(string $eventId):void{
+        $statement = $this->con->prepare(self::UPDATE_EVENT_SQL);
+        $statement->execute(['id' => $eventId]);
     }
 }
