@@ -102,7 +102,7 @@ class DispatchEventContext implements Context
                 ':aggregate_id' => 2,
                 ':aggregate_version' => 1,
                 ':data' => '{"akey":"avalue"}',
-                ':timestamp' => '2022-01-28 12:23:56',
+                ':timestamp' => '2022-01-28 12:23:56.123456',
                 ':correlation_id' => 123,
                 ':user_id' => 23232
             ]
@@ -124,7 +124,7 @@ class DispatchEventContext implements Context
 
         $expectedMessage = self::$kafkaContext->createMessage('{"akey":"avalue"}', [
             'id' => (string)$this->lastEventId,
-            'timestamp' => '2022-01-28 12:23:56',
+            'timestamp' => '2022-01-28 12:23:56.123456',
             'correlation_id' => "123",
             'user_id' => "23232"
         ], [
@@ -152,7 +152,7 @@ class DispatchEventContext implements Context
                 ':aggregate_id' => 2,
                 ':aggregate_version' => 1,
                 ':data' => '{"akey":"avalue"}',
-                ':timestamp' => '2022-01-28 12:23:56',
+                ':timestamp' => '2022-01-28 12:23:56.123456',
                 ':correlation_id' => null,
                 ':user_id' => null,
             ]
@@ -212,8 +212,8 @@ class DispatchEventContext implements Context
                 ':aggregate_id' => 2,
                 ':aggregate_version' => 1,
                 ':data' => '{"akey":"avalue"}',
-                ':timestamp' => '2022-01-28 12:23:56',
-                ':dispatched_at' => '2022-01-28 12:26:47',
+                ':timestamp' => '2022-01-28 12:23:56.123456',
+                ':dispatched_at' => '2022-01-28 12:26:47.123456',
             ]
         );
         $this->lastEventId = $this->con->lastInsertId();
@@ -228,7 +228,7 @@ class DispatchEventContext implements Context
         $stmt->execute(['id' => $this->lastEventId]); 
         $data = $stmt->fetch();
 
-        Assert::that($data['dispatched_at'])->eq('2022-01-28 12:26:47');
+        Assert::that($data['dispatched_at'])->eq('2022-01-28 12:26:47.123456');
     }
 
     /**

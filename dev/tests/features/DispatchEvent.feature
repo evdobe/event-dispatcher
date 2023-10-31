@@ -14,6 +14,7 @@ Scenario: Skip a filtered Event
     Then dispatcher should not produce a message with event data on event channel
     And the event should not be marked as dipatched in db
 
+@skip-already-dispatched
 Scenario: Skip an already dispatched event
     Given The event channel is set
     When an already dispatcehd event is inserted in db 
